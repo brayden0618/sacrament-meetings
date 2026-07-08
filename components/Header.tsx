@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 
 export default function Header() {
@@ -13,7 +15,7 @@ export default function Header() {
       <div className="max-w-6xl mx-auto flex items-center justify-between p-4">
         <div className="flex items-center gap-4">
           <Image
-            src="/sacrament-meeting.jpg"
+            src="/sacrament-meeting.jpeg"
             alt="Sacrament meeting congregation"
             width={80}
             height={80}
