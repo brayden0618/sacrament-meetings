@@ -1,20 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getMeetingById } from "@/lib/meetings-db";
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const id = Number(params.id);
+  const { id } = await params;
+  const meetingId = Number(id);
 
-  if (isNaN(id)) {
+  if (isNaN(meetingId)) {
     return NextResponse.json(
-      { error: "Invalid meeting id" },
+      { error: "Invalid meeting ID" },
       { status: 400 }
     );
   }
 
-  const meeting = getMeetingById(id);
+  const meeting = getMeetingById(meetingId);
 
   if (!meeting) {
     return NextResponse.json(
