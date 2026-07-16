@@ -8,19 +8,22 @@ export default function MeetingDetail({
   meeting,
 }: MeetingDetailProps) {
   return (
-    <div className="max-w-3xl mx-auto p-6">
-
+    <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow">
       <h1 className="text-4xl font-bold mb-6">
-        Sacrament Meeting
+        Sacrament Meeting – {meeting.date}
       </h1>
 
-      <p><strong>Date:</strong> {meeting.date}</p>
+      <p>
+        <strong>Meeting Type:</strong> {meeting.meetingType}
+      </p>
 
-      <p><strong>Meeting Type:</strong> {meeting.meetingType}</p>
+      <p>
+        <strong>Presiding:</strong> {meeting.presiding}
+      </p>
 
-      <p><strong>Presiding:</strong> {meeting.presiding}</p>
-
-      <p><strong>Conducting:</strong> {meeting.conducting}</p>
+      <p>
+        <strong>Conducting:</strong> {meeting.conducting}
+      </p>
 
       <hr className="my-6" />
 
@@ -29,33 +32,41 @@ export default function MeetingDetail({
       </h2>
 
       <p>
-        <strong>Opening Hymn:</strong>{" "}
-        #{meeting.openingHymn.number} - {meeting.openingHymn.title}
+        <strong>Opening Hymn:</strong> #{meeting.openingHymn.number} -{" "}
+        {meeting.openingHymn.title}
       </p>
 
       <p>
-        <strong>Opening Prayer:</strong>{" "}
-        {meeting.openingPrayer}
+        <strong>Opening Prayer:</strong> {meeting.openingPrayer}
       </p>
 
       <hr className="my-6" />
 
       <h2 className="text-2xl font-semibold mb-2">
         Ward Business
-        </h2>
-          
-        <p className="mt-4">
-            <strong>Stake Business:</strong>
-            {meeting.stakeBusiness ? "Yes" : "No"}
-       </p>
+      </h2>
 
-      <ul className="list-disc ml-6">
-        {meeting.wardBusiness.map((item, index) => (
-          <li key={index}>
-            {item.description}
-          </li>
-        ))}
-      </ul>
+      {meeting.wardBusiness.length > 0 ? (
+        <ul className="list-disc ml-6">
+          {meeting.wardBusiness.map((item, index) => (
+            <li key={index}>
+              <strong>{item.title}</strong>: {item.description}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No ward business.</p>
+      )}
+
+      {meeting.stakeBusiness && (
+        <>
+          <h3 className="text-xl font-semibold mt-4">
+            Stake Business
+          </h3>
+
+          <p>Stake business will be conducted during this meeting.</p>
+        </>
+      )}
 
       <hr className="my-6" />
 
@@ -74,17 +85,17 @@ export default function MeetingDetail({
         Speakers
       </h2>
 
-      <ul className="space-y-2">
-        {meeting.speakers.map((speaker, index) => (
-          <li key={index}>
-            <strong>{speaker.name}</strong>
-
-            {speaker.type === "speaker"
-              ? ` — ${speaker.topic}`
-              : " (Musical Number)"}
-          </li>
-        ))}
-      </ul>
+      {meeting.speakers.length > 0 ? (
+        <ul className="list-disc ml-6">
+          {meeting.speakers.map((speaker, index) => (
+            <li key={index}>
+              <strong>{speaker.name}</strong> — {speaker.topic}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No speakers assigned.</p>
+      )}
 
       <hr className="my-6" />
 
@@ -93,17 +104,15 @@ export default function MeetingDetail({
       </h2>
 
       <p>
-        <strong>Closing Hymn:</strong>{" "}
-        #{meeting.closingHymn.number} -{" "}
+        <strong>Closing Hymn:</strong> #{meeting.closingHymn.number} -{" "}
         {meeting.closingHymn.title}
       </p>
 
       <p>
-        <strong>Closing Prayer:</strong>{" "}
-        {meeting.closingPrayer}
+        <strong>Closing Prayer:</strong> {meeting.closingPrayer}
       </p>
 
-      {meeting.announcements && meeting.announcements.length > 0 && (
+      {meeting.announcements.length > 0 && (
         <>
           <hr className="my-6" />
 

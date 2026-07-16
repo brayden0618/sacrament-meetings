@@ -1,6 +1,8 @@
 import MeetingDetail from "@/components/MeetingDetail";
 import { getMeetingById } from "@/lib/meetings-db";
 
+export const dynamic = "force-dynamic";
+
 export default async function MeetingPage({
   params,
 }: {
@@ -14,7 +16,7 @@ export default async function MeetingPage({
     return <h1>Invalid meeting ID</h1>;
   }
 
-  const meeting = getMeetingById(meetingId);
+  const meeting = await getMeetingById(meetingId);
 
   if (!meeting) {
     return <h1>Meeting not found.</h1>;
