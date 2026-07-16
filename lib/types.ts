@@ -1,37 +1,38 @@
-export type MeetingType =
-  | 'testimony'
-  | 'regular'
-  | 'stake'
-  | 'general';
-
 export interface Hymn {
   number: number;
   title: string;
 }
 
-export interface SpeakerItem {
+export interface Speaker {
   name: string;
   topic: string;
-  type: 'speaker' | 'musical-number';
 }
 
 export interface WardBusinessItem {
+  title: string;
   description: string;
 }
 
 export interface SacramentMeeting {
   id: number;
-  date: string;              // ISO date string: 'YYYY-MM-DD'
-  meetingType: MeetingType;
+  date: string;
+  meetingType: string;
   presiding: string;
   conducting: string;
-  announcements?: string[];
+
+  announcements: string[];
+
   openingHymn: Hymn;
-  openingPrayer: string;
-  wardBusiness: WardBusinessItem[];
-  stakeBusiness: boolean;
   sacramentHymn: Hymn;
-  speakers: SpeakerItem[];
   closingHymn: Hymn;
+
+  openingPrayer: string;
+
+  wardBusiness: WardBusinessItem[];
+
+  stakeBusiness: boolean;
+
+  speakers: Speaker[];
+
   closingPrayer: string;
 }
