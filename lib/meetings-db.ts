@@ -1,5 +1,13 @@
 import { neon } from "@neondatabase/serverless";
-import type { SacramentMeeting, WardBusinessItem } from "./types";
+import { revalidatePath } from "next/cache";
+
+import type {
+  SacramentMeeting,
+  WardBusinessItem,
+  Hymn,
+  Speaker,
+} from "./types";
+
 
 function getSql() {
   if (!process.env.DATABASE_URL) {
@@ -9,15 +17,6 @@ function getSql() {
   return neon(process.env.DATABASE_URL);
 }
 
-type Hymn = {
-  number: number;
-  title: string;
-};
-
-type Speaker = {
-  name: string;
-  topic: string;
-};
 
 type MeetingRow = {
   id: number;
@@ -42,6 +41,7 @@ type MeetingRow = {
   closing_prayer: string;
 };
 
+
 function mapMeeting(row: MeetingRow): SacramentMeeting {
   return {
     id: row.id,
@@ -49,9 +49,11 @@ function mapMeeting(row: MeetingRow): SacramentMeeting {
       row.date instanceof Date
         ? row.date.toISOString().split("T")[0]
         : row.date,
+
     meetingType: row.meeting_type,
     presiding: row.presiding,
     conducting: row.conducting,
+
     announcements: row.announcements,
 
     openingHymn: row.opening_hymn,
@@ -88,11 +90,13 @@ export async function getMeetings(
       WHERE
         LOWER(conducting) LIKE ${`%${query.toLowerCase()}%`}
         OR LOWER(presiding) LIKE ${`%${query.toLowerCase()}%`}
+        OR LOWER(meeting_type) LIKE ${`%${query.toLowerCase()}%`}
         OR LOWER(speakers::text) LIKE ${`%${query.toLowerCase()}%`}
       ORDER BY date DESC
       LIMIT ${limit}
       OFFSET ${offset}
     ` as MeetingRow[];
+
   } else {
     rows = await sql`
       SELECT *
@@ -123,8 +127,8 @@ export async function getMeetingsPages(
       WHERE
         LOWER(conducting) LIKE ${`%${query.toLowerCase()}%`}
         OR LOWER(presiding) LIKE ${`%${query.toLowerCase()}%`}
-        OR LOWER(speakers::text) LIKE ${`%${query.toLowerCase()}%`}
         OR LOWER(meeting_type) LIKE ${`%${query.toLowerCase()}%`}
+        OR LOWER(speakers::text) LIKE ${`%${query.toLowerCase()}%`}
     `;
   } else {
     result = await sql`
@@ -154,4 +158,120 @@ export async function getMeetingById(
   }
 
   return mapMeeting(rows[0]);
+}
+
+
+export type MeetingFormData = {
+  date: string;
+  meetingType: string;
+  presiding: string;
+  conducting: string;
+
+  announcements: string[];
+
+  openingHymn: Hymn;
+  openingPrayer: string;
+
+  wardBusiness: WardBusinessItem[];
+  stakeBusiness: boolean;
+
+  sacramentHymn: Hymn;
+
+  speakers: Speaker[];
+
+  closingHymn: Hymn;
+  closingPrayer: string;
+};
+
+
+export async function createMeeting(data: MeetingFormData) {
+
+  const sql = getSql();
+
+  await sql`
+    INSERT INTO meetings (
+      date,
+      meeting_type,
+      presiding,
+      conducting,
+      announcements,
+      opening_hymn,
+      opening_prayer,
+      ward_business,
+      stake_business,
+      sacrament_hymn,
+      speakers,
+      closing_hymn,
+      closing_prayer
+    )
+    VALUES (
+      ${data.date},
+      ${data.meetingType},
+      ${data.presiding},
+      ${data.conducting},
+      ${JSON.stringify(data.announcements)},
+      ${JSON.stringify(data.openingHymn)},
+      ${data.openingPrayer},
+      ${JSON.stringify(data.wardBusiness)},
+      ${data.stakeBusiness},
+      ${JSON.stringify(data.sacramentHymn)},
+      ${JSON.stringify(data.speakers)},
+      ${JSON.stringify(data.closingHymn)},
+      ${data.closingPrayer}
+    )
+  `;
+}
+
+
+export async function updateMeeting(
+  id: number,
+  data: MeetingFormData
+) {
+
+  const sql = getSql();
+
+  await sql`
+    UPDATE meetings
+    SET
+      date = ${data.date},
+      meeting_type = ${data.meetingType},
+      presiding = ${data.presiding},
+      conducting = ${data.conducting},
+      announcements = ${JSON.stringify(data.announcements)},
+      opening_hymn = ${JSON.stringify(data.openingHymn)},
+      opening_prayer = ${data.openingPrayer},
+      ward_business = ${JSON.stringify(data.wardBusiness)},
+      stake_business = ${data.stakeBusiness},
+      sacrament_hymn = ${JSON.stringify(data.sacramentHymn)},
+      speakers = ${JSON.stringify(data.speakers)},
+      closing_hymn = ${JSON.stringify(data.closingHymn)},
+      closing_prayer = ${data.closingPrayer}
+    WHERE id = ${id}
+  `;
+}
+
+
+export async function deleteMeeting(id: number) {
+
+  const sql = getSql();
+
+  await sql`
+    DELETE FROM meetings
+    WHERE id = ${id}
+  `;
+}
+
+
+export async function deleteMeetingAction(
+  id: number
+): Promise<void> {
+
+  try {
+    await deleteMeeting(id);
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to delete meeting.");
+  }
+
+  revalidatePath("/meetings");
 }

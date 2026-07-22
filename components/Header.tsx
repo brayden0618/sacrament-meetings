@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Header() {
   const today = new Date().toLocaleDateString("en-US", {
@@ -13,6 +14,7 @@ export default function Header() {
   return (
     <header className="bg-blue-900 text-white shadow-md">
       <div className="max-w-6xl mx-auto flex items-center justify-between p-4">
+
         <div className="flex items-center gap-4">
           <Image
             src="/sacrament-meeting.jpeg"
@@ -30,13 +32,36 @@ export default function Header() {
             <p className="text-sm">
               Sacrament Meeting Planner
             </p>
+
+            <nav className="flex gap-4 mt-3">
+              <Link
+                href="/meetings"
+                className="hover:underline"
+              >
+                View Meetings
+              </Link>
+
+              <Link
+                href="/meetings/new"
+                className="hover:underline"
+              >
+                Create Meeting
+              </Link>
+            </nav>
           </div>
         </div>
 
+
         <div className="text-right">
-          <p className="font-semibold">Today</p>
-          <p>{today}</p>
+          <p className="font-semibold">
+            Today
+          </p>
+
+          <p>
+            {today}
+          </p>
         </div>
+
       </div>
     </header>
   );
